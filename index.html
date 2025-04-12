@@ -455,6 +455,63 @@
         border: 1px solid #ddd;
       }
     }
+
+    .comparison-section {
+      margin-top: 20px;
+    }
+    
+    .comparison-card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    
+    .comparison-card h3 {
+      color: var(--primary);
+      margin-bottom: 15px;
+    }
+    
+    #score-difference {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    
+    .score-bar-container {
+      height: 20px;
+      background-color: var(--border);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #score-bar {
+      height: 100%;
+      width: 50%;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+      transition: transform 0.5s ease;
+      transform-origin: center;
+    }
+    
+    .winning {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+    
+    .losing {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+    
+    .tied {
+      background-color: rgba(107, 114, 128, 0.1);
+      color: var(--text-light);
+    }
   </style>
   <title>Cricket Team Draft</title>
 </head>
@@ -599,16 +656,9 @@
       <button class="btn btn-primary" id="randomize-btn" onclick="randomizeDraft()">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shuffle" viewBox="0 0 16 16" style="margin-right: 8px;">
           <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.624 9.624 0 0 0 7.556 8a9.624 9.624 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
-          <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192zm0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"/>
+          <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"/>
         </svg>
         Randomize Draft
-      </button>
-      <button class="btn btn-secondary" id="reset-btn" onclick="resetDraft()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16" style="margin-right: 8px;">
-          <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
-          <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
-        </svg>
-        Reset
       </button>
       <button class="btn btn-secondary" id="update-btn" onclick="updateStats()">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
@@ -643,6 +693,16 @@
           </div>
         </div>
       </div>
+
+      <div class="comparison-section">
+        <div class="comparison-card">
+          <h3>Score Comparison</h3>
+          <div id="score-difference"></div>
+          <div class="score-bar-container">
+            <div id="score-bar"></div>
+          </div>
+        </div>
+      </div>
       
       <div class="action-buttons">
         <button class="btn btn-print" onclick="window.print()">
@@ -664,70 +724,145 @@
   
   <script>
     const cricketTeams = [
-        { teams: ["Gujarat Titans", "Lucknow Super Giants"], date: "Apr 12" },
-        { teams: ["Punjab Kings", "Sunrisers Hyderabad"], date: "Apr 12" },
-        { teams: ["Royal Challengers Bengaluru", "Rajasthan Royals"], date: "Apr 13" },
-        { teams: ["Mumbai Indians", "Delhi Capitals"], date: "Apr 13" },
-        { teams: ["Chennai Super Kings", "Lucknow Super Giants"], date: "Apr 14" },
-        { teams: ["Kolkata Knight Riders", "Punjab Kings"], date: "Apr 15" },
-        { teams: ["Rajasthan Royals", "Delhi Capitals"], date: "Apr 16" },
-        { teams: ["Sunrisers Hyderabad", "Mumbai Indians"], date: "Apr 17" },
-        { teams: ["Punjab Kings", "Royal Challengers Bengaluru"], date: "Apr 18" },
-        { teams: ["Delhi Capitals", "Gujarat Titans"], date: "Apr 19" },
-        { teams: ["Lucknow Super Giants", "Rajasthan Royals"], date: "Apr 19" },
-        { teams: ["Royal Challengers Bengaluru", "Punjab Kings"], date: "Apr 20" },
-        { teams: ["Chennai Super Kings", "Mumbai Indians"], date: "Apr 20" },
-        { teams: ["Gujarat Titans", "Kolkata Knight Riders"], date: "Apr 21" },
-        { teams: ["Delhi Capitals", "Lucknow Super Giants"], date: "Apr 22" },
-        { teams: ["Mumbai Indians", "Sunrisers Hyderabad"], date: "Apr 23" },
-        { teams: ["Rajasthan Royals", "Royal Challengers Bengaluru"], date: "Apr 24" },
-        { teams: ["Sunrisers Hyderabad", "Chennai Super Kings"], date: "Apr 25" },
-        { teams: ["Punjab Kings", "Kolkata Knight Riders"], date: "Apr 26" },
-        { teams: ["Lucknow Super Giants", "Mumbai Indians"], date: "Apr 27" },
-        { teams: ["Gujarat Titans", "Rajasthan Royals"], date: "Apr 28" },
-        { teams: ["Kolkata Knight Riders", "Delhi Capitals"], date: "Apr 29" },
-        { teams: ["Punjab Kings", "Chennai Super Kings"], date: "Apr 30" },
-        { teams: ["Mumbai Indians", "Rajasthan Royals"], date: "May 1" },
-        { teams: ["Sunrisers Hyderabad", "Gujarat Titans"], date: "May 2" },
-        { teams: ["Chennai Super Kings", "Royal Challengers Bengaluru"], date: "May 3" },
-        { teams: ["Rajasthan Royals", "Kolkata Knight Riders"], date: "May 4" },
-        { teams: ["Lucknow Super Giants", "Punjab Kings"], date: "May 4" },
-        { teams: ["Delhi Capitals", "Sunrisers Hyderabad"], date: "May 5" },
-        { teams: ["Gujarat Titans", "Mumbai Indians"], date: "May 6" },
-        { teams: ["Chennai Super Kings", "Kolkata Knight Riders"], date: "May 7" },
-        { teams: ["Delhi Capitals", "Punjab Kings"], date: "May 8" },
-        { teams: ["Royal Challengers Bengaluru", "Lucknow Super Giants"], date: "May 9" },
-        { teams: ["Kolkata Knight Riders", "Sunrisers Hyderabad"], date: "May 10" },
-        { teams: ["Mumbai Indians", "Punjab Kings"], date: "May 11" },
-        { teams: ["Gujarat Titans", "Delhi Capitals"], date: "May 11" },
-        { teams: ["Rajasthan Royals", "Chennai Super Kings"], date: "May 12" },
-        { teams: ["Sunrisers Hyderabad", "Royal Challengers Bengaluru"], date: "May 13" },
-        { teams: ["Lucknow Super Giants", "Gujarat Titans"], date: "May 14" },
-        { teams: ["Delhi Capitals", "Mumbai Indians"], date: "May 15" },
-        { teams: ["Punjab Kings", "Rajasthan Royals"], date: "May 16" },
-        { teams: ["Kolkata Knight Riders", "Royal Challengers Bengaluru"], date: "May 17" },
-        { teams: ["Chennai Super Kings", "Gujarat Titans"], date: "May 18" },
-        { teams: ["Sunrisers Hyderabad", "Lucknow Super Giants"], date: "May 18" },
-        { teams: ["2nd Place", "1st Place"], date: "May 20 - Qualifier 1" },
-        { teams: ["4th Place", "3rd Place"], date: "May 21 - Eliminator" },
-        { teams: ["Winner of Eliminator", "Loser of Qualifier 1"], date: "May 23 - Qualifier 2" },
-        { teams: ["Winner of Qualifier 2", "Winner of Qualifier 1"], date: "May 25 - Final" }
+    { teams: ["Gujarat Titans", "Lucknow Super Giants"], date: "Apr 12", time: "3:30 PM IST" },
+  { teams: ["Punjab Kings", "Sunrisers Hyderabad"], date: "Apr 12", time: "7:30 PM IST" },
+  { teams: ["Royal Challengers Bengaluru", "Rajasthan Royals"], date: "Apr 13", time: "3:30 PM IST" },
+  { teams: ["Mumbai Indians", "Delhi Capitals"], date: "Apr 13", time: "7:30 PM IST" },
+  { teams: ["Chennai Super Kings", "Lucknow Super Giants"], date: "Apr 14", time: "7:30 PM IST" },
+  { teams: ["Kolkata Knight Riders", "Punjab Kings"], date: "Apr 15", time: "7:30 PM IST" },
+  { teams: ["Rajasthan Royals", "Delhi Capitals"], date: "Apr 16", time: "7:30 PM IST" },
+  { teams: ["Sunrisers Hyderabad", "Mumbai Indians"], date: "Apr 17", time: "7:30 PM IST" },
+  { teams: ["Punjab Kings", "Royal Challengers Bengaluru"], date: "Apr 18", time: "7:30 PM IST" },
+  { teams: ["Delhi Capitals", "Gujarat Titans"], date: "Apr 19", time: "3:30 PM IST" },
+  { teams: ["Lucknow Super Giants", "Rajasthan Royals"], date: "Apr 19", time: "7:30 PM IST" },
+  { teams: ["Royal Challengers Bengaluru", "Punjab Kings"], date: "Apr 20", time: "3:30 PM IST" },
+  { teams: ["Chennai Super Kings", "Mumbai Indians"], date: "Apr 20", time: "7:30 PM IST" },
+  { teams: ["Gujarat Titans", "Kolkata Knight Riders"], date: "Apr 21", time: "7:30 PM IST" },
+  { teams: ["Delhi Capitals", "Lucknow Super Giants"], date: "Apr 22", time: "7:30 PM IST" },
+  { teams: ["Mumbai Indians", "Sunrisers Hyderabad"], date: "Apr 23", time: "7:30 PM IST" },
+  { teams: ["Rajasthan Royals", "Royal Challengers Bengaluru"], date: "Apr 24", time: "7:30 PM IST" },
+  { teams: ["Sunrisers Hyderabad", "Chennai Super Kings"], date: "Apr 25", time: "7:30 PM IST" },
+  { teams: ["Punjab Kings", "Kolkata Knight Riders"], date: "Apr 26", time: "7:30 PM IST" },
+  { teams: ["Lucknow Super Giants", "Mumbai Indians"], date: "Apr 27", time: "7:30 PM IST" },
+  { teams: ["Gujarat Titans", "Rajasthan Royals"], date: "Apr 28", time: "7:30 PM IST" },
+  { teams: ["Kolkata Knight Riders", "Delhi Capitals"], date: "Apr 29", time: "7:30 PM IST" },
+  { teams: ["Punjab Kings", "Chennai Super Kings"], date: "Apr 30", time: "7:30 PM IST" },
+  { teams: ["Mumbai Indians", "Rajasthan Royals"], date: "May 1", time: "7:30 PM IST" },
+  { teams: ["Sunrisers Hyderabad", "Gujarat Titans"], date: "May 2", time: "7:30 PM IST" },
+  { teams: ["Chennai Super Kings", "Royal Challengers Bengaluru"], date: "May 3", time: "7:30 PM IST" },
+  { teams: ["Rajasthan Royals", "Kolkata Knight Riders"], date: "May 4", time: "3:30 PM IST" },
+  { teams: ["Lucknow Super Giants", "Punjab Kings"], date: "May 4", time: "7:30 PM IST" },
+  { teams: ["Delhi Capitals", "Sunrisers Hyderabad"], date: "May 5", time: "7:30 PM IST" },
+  { teams: ["Gujarat Titans", "Mumbai Indians"], date: "May 6", time: "7:30 PM IST" },
+  { teams: ["Chennai Super Kings", "Kolkata Knight Riders"], date: "May 7", time: "7:30 PM IST" },
+  { teams: ["Delhi Capitals", "Punjab Kings"], date: "May 8", time: "7:30 PM IST" },
+  { teams: ["Royal Challengers Bengaluru", "Lucknow Super Giants"], date: "May 9", time: "7:30 PM IST" },
+  { teams: ["Kolkata Knight Riders", "Sunrisers Hyderabad"], date: "May 10", time: "7:30 PM IST" },
+  { teams: ["Mumbai Indians", "Punjab Kings"], date: "May 11", time: "3:30 PM IST" },
+  { teams: ["Gujarat Titans", "Delhi Capitals"], date: "May 11", time: "7:30 PM IST" },
+  { teams: ["Rajasthan Royals", "Chennai Super Kings"], date: "May 12", time: "7:30 PM IST" },
+  { teams: ["Sunrisers Hyderabad", "Royal Challengers Bengaluru"], date: "May 13", time: "7:30 PM IST" },
+  { teams: ["Lucknow Super Giants", "Gujarat Titans"], date: "May 14", time: "7:30 PM IST" },
+  { teams: ["Delhi Capitals", "Mumbai Indians"], date: "May 15", time: "7:30 PM IST" },
+  { teams: ["Punjab Kings", "Rajasthan Royals"], date: "May 16", time: "7:30 PM IST" },
+  { teams: ["Kolkata Knight Riders", "Royal Challengers Bengaluru"], date: "May 17", time: "7:30 PM IST" },
+  { teams: ["Chennai Super Kings", "Gujarat Titans"], date: "May 18", time: "3:30 PM IST" },
+  { teams: ["Sunrisers Hyderabad", "Lucknow Super Giants"], date: "May 18", time: "7:30 PM IST" },
+  { teams: ["2nd Place", "1st Place"], date: "May 20 - Qualifier 1", time: "7:30 PM IST" },
+  { teams: ["4th Place", "3rd Place"], date: "May 21 - Eliminator", time: "7:30 PM IST" },
+  { teams: ["Winner of Eliminator", "Loser of Qualifier 1"], date: "May 23 - Qualifier 2", time: "7:30 PM IST" },
+  { teams: ["Winner of Qualifier 2", "Winner of Qualifier 1"], date: "May 25 - Final", time: "7:30 PM IST" }
     ];
 
     let currentTeamIndex = 0;
 
     function autoFillTeams() {
-        if (currentTeamIndex >= cricketTeams.length) {
-            currentTeamIndex = 0;
+        const now = new Date();
+        let nextMatch = null;
+
+        // Find next match regardless of time difference
+        for (let match of cricketTeams) {
+            const dateTime = parseMatchDateTime(match.date, match.time);
+            const timeDiff = dateTime - now;
+            
+            // Get next upcoming match
+            if (timeDiff > -(30 * 60 * 1000)) {
+                nextMatch = {
+                    teams: match.teams,
+                    date: match.date,
+                    time: match.time,
+                    matchTime: dateTime,
+                    timeDiff: timeDiff
+                };
+                break;
+            }
         }
 
-        const match = cricketTeams[currentTeamIndex];
+        if (!nextMatch) {
+            alert("No upcoming matches available");
+            return;
+        }
+
+        const hours = Math.floor(nextMatch.timeDiff / (60 * 60 * 1000));
+        const minutes = Math.floor((nextMatch.timeDiff % (60 * 60 * 1000)) / (60 * 1000));
+        const days = Math.floor(hours / 24);
+
+        // If more than 30 minutes before match
+        if (nextMatch.timeDiff > 30 * 60 * 1000) {
+            let message = '';
+            if (days > 0) {
+                message = `Next match (${nextMatch.teams[0]} vs ${nextMatch.teams[1]}) starts in ${days} days ${hours % 24}h ${minutes}m`;
+            } else {
+                message = `Next match (${nextMatch.teams[0]} vs ${nextMatch.teams[1]}) starts in ${hours}h ${minutes}m`;
+            }
+            alert(`${message}\nCome back 30 minutes before match time to pick teams.`);
+            
+            // Store next match info
+            localStorage.setItem('nextMatch', JSON.stringify({
+                teams: nextMatch.teams,
+                date: nextMatch.date,
+                time: nextMatch.time,
+                matchTime: nextMatch.matchTime
+            }));
+            return;
+        }
+
+        // Within 30 minutes of match start
+        updateTeamDisplay(nextMatch);
+        scheduleNextMatch(nextMatch);
+        createMiniConfetti();
+
+        // Clear stored match after displaying
+        localStorage.removeItem('nextMatch');
+    }
+
+    function parseMatchDateTime(dateStr, timeStr) {
+        const [month, day] = dateStr.split(' ');
+        const [timeNumbers, meridiem] = timeStr.split(' ')[0].split(':')[0].split(' ');
+        const minutes = timeStr.split(':')[1].split(' ')[0];
+        
+        // Create date object for current year
+        const date = new Date();
+        date.setMonth(getMonthNumber(month));
+        date.setDate(parseInt(day));
+        
+        // Set hours (convert to 24-hour format if needed)
+        let hour = parseInt(timeNumbers);
+        if (timeStr.includes('PM') && hour !== 12) hour += 12;
+        if (timeStr.includes('AM') && hour === 12) hour = 0;
+        
+        date.setHours(hour, parseInt(minutes), 0, 0);
+        
+        return date;
+    }
+
+    function updateTeamDisplay(match) {
         const team1Input = document.getElementById('team1-name');
         const team2Input = document.getElementById('team2-name');
         const team1Date = document.getElementById('team1-date');
         const team2Date = document.getElementById('team2-date');
+        const button = document.querySelector('.btn.btn-secondary[onclick="autoFillTeams()"]');
 
-        // Animate the text change
         team1Input.style.transition = 'opacity 0.3s';
         team2Input.style.transition = 'opacity 0.3s';
         team1Input.style.opacity = '0';
@@ -736,18 +871,53 @@
         setTimeout(() => {
             team1Input.value = match.teams[0];
             team2Input.value = match.teams[1];
-            team1Date.textContent = `Match Date: ${match.date}`;
-            team2Date.textContent = `Match Date: ${match.date}`;
+            team1Date.textContent = `Match Date: ${match.date} | ${match.time}`;
+            team2Date.textContent = `Match Date: ${match.date} | ${match.time}`;
             team1Input.style.opacity = '1';
             team2Input.style.opacity = '1';
             
-            // Update team displays
             document.getElementById('team1-display').textContent = match.teams[0];
             document.getElementById('team2-display').textContent = match.teams[1];
-        }, 300);
 
-        currentTeamIndex++;
-        createMiniConfetti();
+            // Disable button after selecting teams
+            button.disabled = true;
+        }, 300);
+    }
+
+    function scheduleNextMatch(currentMatch) {
+        const now = new Date();
+        let nextMatch = null;
+
+        // Find the next match after current one
+        for (let match of cricketTeams) {
+            const dateTime = parseMatchDateTime(match.date, match.time);
+            if (dateTime > currentMatch.matchTime) {
+                nextMatch = {
+                    matchTime: dateTime,
+                    timeDiff: dateTime - now
+                };
+                break;
+            }
+        }
+
+        if (nextMatch) {
+            const button = document.querySelector('.btn.btn-secondary[onclick="autoFillTeams()"]');
+            const enableTime = nextMatch.matchTime.getTime() - (30 * 60 * 1000);
+            const timeToWait = enableTime - now.getTime();
+            
+            setTimeout(() => {
+                button.disabled = false;
+            }, timeToWait);
+        }
+    }
+
+    function getMonthNumber(month) {
+        const months = {
+            'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3,
+            'May': 4, 'Jun': 5, 'Jul': 6, 'Aug': 7,
+            'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+        };
+        return months[month] || 0;
     }
 
     function createMiniConfetti() {
@@ -766,6 +936,30 @@
         }
     }
 
+    function checkStoredMatch() {
+        const storedMatch = localStorage.getItem('nextMatch');
+        if (storedMatch) {
+            const match = JSON.parse(storedMatch);
+            const now = new Date();
+            const matchTime = new Date(match.matchTime);
+            const timeDiff = matchTime - now;
+
+            // If within 30 minutes of match start
+            if (timeDiff <= 30 * 60 * 1000 && timeDiff > -(30 * 60 * 1000)) {
+                updateTeamDisplay({
+                    teams: match.teams,
+                    date: match.date,
+                    time: match.time,
+                    matchTime: matchTime,
+                    timeDiff: timeDiff
+                });
+                scheduleNextMatch(match);
+                createMiniConfetti();
+                localStorage.removeItem('nextMatch');
+            }
+        }
+    }
+
     // Update team name displays when input changes
     document.getElementById('team1-name').addEventListener('input', function() {
       document.getElementById('team1-display').textContent = this.value || 'Team 1';
@@ -777,12 +971,11 @@
     
     let isButtonEnabled = true;
     let cooldownTimer;
-    let isResetButtonEnabled = true;
-    let resetCooldownTimer;
 
-    function startCooldown() {
+    function startCooldown(nextMatchTime) {
         const button = document.getElementById('randomize-btn');
-        let timeLeft = 21600; // 6 hours in seconds
+        const now = new Date();
+        let timeLeft = Math.floor((nextMatchTime - now) / 1000); // Convert to seconds
          
         button.disabled = true;
         isButtonEnabled = false;
@@ -792,15 +985,21 @@
             const hours = Math.floor(timeLeft / 3600);
             const minutes = Math.floor((timeLeft % 3600) / 60);
             const seconds = timeLeft % 60;
+            const days = Math.floor(hours / 24);
             
-            const timeString = `${hours}h ${minutes}m ${seconds}s`;
+            let timeString = '';
+            if (days > 0) {
+                timeString = `${days}d ${hours % 24}h ${minutes}m ${seconds}s`;
+            } else {
+                timeString = `${hours}h ${minutes}m ${seconds}s`;
+            }
             
             button.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shuffle" viewBox="0 0 16 16" style="margin-right: 8px;">
                     <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.624 9.624 0 0 0 7.556 8a9.624 9.624 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
                     <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"/>
                 </svg>
-                Wait ${timeString}`;
+                Next in ${timeString}`;
             
             timeLeft--;
             
@@ -810,7 +1009,7 @@
                 isButtonEnabled = true;
                 button.innerHTML = `
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shuffle" viewBox="0 0 16 16" style="margin-right: 8px;">
-                        <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827-1.24 4.874-2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.624 9.624 0 0 0 7.556 8a9.624 9.624 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
+                        <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827-1.24 4.874-2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
                         <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"/>
                     </svg>
                     Randomize Draft`;
@@ -818,50 +1017,68 @@
         }, 1000);
     }
 
-    function startResetCooldown() {
-        const button = document.getElementById('reset-btn');
-        let timeLeft = 21600; // 6 hours in seconds
-         
-        button.disabled = true;
-        isResetButtonEnabled = false;
-        
-        resetCooldownTimer = setInterval(() => {
-            const hours = Math.floor(timeLeft / 3600);
-            const minutes = Math.floor((timeLeft % 3600) / 60);
-            const seconds = timeLeft % 60;
-            
-            const timeString = `${hours}h ${minutes}m ${seconds}s`;
-            
-            button.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16" style="margin-right: 8px;">
-                    <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
-                    <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
-                </svg>
-                Wait ${timeString}`;
-            
-            timeLeft--;
-            
-            if (timeLeft < 0) {
-                clearInterval(resetCooldownTimer);
-                button.disabled = false;
-                isResetButtonEnabled = true;
-                button.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16" style="margin-right: 8px;">
-                        <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
-                        <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
-                    </svg>
-                    Reset`;
+    function findNextMatch(currentMatchTime) {
+        for (let match of cricketTeams) {
+            const dateTime = parseMatchDateTime(match.date, match.time);
+            if (dateTime > currentMatchTime) {
+                return dateTime;
             }
-        }, 1000);
+        }
+        return null;
     }
 
     function randomizeDraft() {
+        // Check if teams are selected
+        const team1Input = document.getElementById('team1-name');
+        const team2Input = document.getElementById('team2-name');
+        
+        if (!team1Input.value || !team2Input.value) {
+            alert("Please select teams using 'Get Next Match' first!");
+            return;
+        }
+
+        // Check if within 30 minutes of match time
+        const matchDateStr = document.getElementById('team1-date').textContent.replace('Match Date: ', '');
+        if (!matchDateStr) {
+            alert("Match date not found. Please select teams first!");
+            return;
+        }
+
+        const [date, time] = matchDateStr.split(' | ');
+        const matchDateTime = parseMatchDateTime(date, time);
+        const now = new Date();
+        const timeDiff = matchDateTime - now;
+
+        // If not within 30 minutes before match
+        if (timeDiff > 30 * 60 * 1000) {
+            const hours = Math.floor(timeDiff / (60 * 60 * 1000));
+            const minutes = Math.floor((timeDiff % (60 * 60 * 1000)) / (60 * 1000));
+            const days = Math.floor(hours / 24);
+
+            let message = '';
+            if (days > 0) {
+                message = `Match starts in ${days} days ${hours % 24}h ${minutes}m`;
+            } else {
+                message = `Match starts in ${hours}h ${minutes}m`;
+            }
+            alert(`${message}\nCome back 30 minutes before match time to randomize teams.`);
+            return;
+        }
+
+        // If match has already started (more than 30 minutes past start time)
+        if (timeDiff < -(30 * 60 * 1000)) {
+            alert("This match has already started. Please select a new match.");
+            return;
+        }
+
         if (!isButtonEnabled) return;
         
-        // Start the cooldown
-        startCooldown();
+        const nextMatch = findNextMatch(matchDateTime);
+        if (nextMatch) {
+            startCooldown(nextMatch);
+        }
         
-        // Rest of your existing randomizeDraft code
+        // Rest of the existing randomizeDraft code...
         const team1Name = document.getElementById('team1-name').value || 'Team 1';
         const team2Name = document.getElementById('team2-name').value || 'Team 2';
         
@@ -1013,40 +1230,39 @@
         });
         
         player2Div.innerHTML += createStatsSummary(player2Stats);
-    }
-    
-    function resetDraft() {
-        if (!isResetButtonEnabled) return;
+
+        const player1Total = player1Stats.runs + (player1Stats.fours * 3) + (player1Stats.sixes * 5);
+        const player2Total = player2Stats.runs + (player2Stats.fours * 3) + (player2Stats.sixes * 5);
         
-        // Start the reset cooldown
-        startResetCooldown();
+        const difference = Math.abs(player1Total - player2Total);
+        const player1Name = document.getElementById('player1-name').value || 'Player 1';
+        const player2Name = document.getElementById('player2-name').value || 'Player 2';
         
-        if (cooldownTimer) {
-            clearInterval(cooldownTimer);
+        const scoreDiff = document.getElementById('score-difference');
+        const scoreBar = document.getElementById('score-bar');
+        
+        let message;
+        if (player1Total > player2Total) {
+            message = `${player1Name} is winning by ${difference} points`;
+            scoreDiff.className = 'winning';
+            scoreBar.style.transform = `translateX(${(player1Total / (player1Total + player2Total) * 100) - 50}%)`;
+        } else if (player2Total > player1Total) {
+            message = `${player2Name} is winning by ${difference} points`;
+            scoreDiff.className = 'losing';
+            scoreBar.style.transform = `translateX(${(player1Total / (player1Total + player2Total) * 100) - 50}%)`;
+        } else {
+            message = "It's a tie!";
+            scoreDiff.className = 'tied';
+            scoreBar.style.transform = 'translateX(0)';
         }
         
-        const button = document.getElementById('randomize-btn');
-        button.disabled = false;
-        isButtonEnabled = true;
-        button.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shuffle" viewBox="0 0 16 16" style="margin-right: 8px;">
-                <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827-1.24 4.874-2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.624 9.624 0 0 1 7.556 8a9.624 9.624 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
-                <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192zm0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"/>
-            </svg>
-            Randomize Draft`;
-        
-        document.getElementById('results').style.display = 'none';
-        document.getElementById('player1-picks').innerHTML = '';
-        document.getElementById('player2-picks').innerHTML = '';
-        const confetti = document.querySelectorAll('.confetti');
-        confetti.forEach(c => c.remove());
-
-        // Clear all stat inputs
+        scoreDiff.textContent = message;
+    }
+    
+    function clearStats() {
         document.querySelectorAll('.stat-input').forEach(input => {
             input.value = '';
         });
-
-        // Clear localStorage
         localStorage.removeItem('cricketStats');
     }
     
@@ -1207,7 +1423,10 @@
     });
 
     // Load stats when page loads
-    document.addEventListener('DOMContentLoaded', loadStatsFromLocalStorage);
+    document.addEventListener('DOMContentLoaded', () => {
+        loadStatsFromLocalStorage();
+        checkStoredMatch();
+    });
 
     function updateStats() {
         // Get the current players from the results
