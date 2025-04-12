@@ -615,6 +615,109 @@
       background-color: rgba(107, 114, 128, 0.1);
       color: var(--text-light);
     }
+
+    /* Winner Celebration Styles */
+    .celebration-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        max-width: 500px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        padding: 2rem;
+        border-radius: 20px;
+        text-align: center;
+        z-index: 1000;
+        color: white;
+        box-shadow: 0 0 100px rgba(0,0,0,0.5);
+        animation: modalPop 0.5s ease-out;
+        display: none;
+    }
+
+    .trophy-container {
+        position: relative;
+        height: 120px;
+        margin: 20px 0;
+    }
+
+    .trophy-icon {
+        font-size: 5rem;
+        animation: trophyBounce 2s infinite;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .winner-name {
+        font-size: 2.5rem;
+        margin: 20px 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        animation: winnerPulse 2s infinite;
+    }
+
+    .sparkle {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: white;
+        clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        animation: sparkleFloat 3s infinite linear;
+    }
+
+    .firework {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        animation: firework 1s ease-out forwards;
+    }
+
+    @keyframes modalPop {
+        0% { transform: translate(-50%, -50%) scale(0); }
+        60% { transform: translate(-50%, -50%) scale(1.1); }
+        100% { transform: translate(-50%, -50%) scale(1); }
+    }
+
+    @keyframes trophyBounce {
+        0%, 100% { transform: translateX(-50%) translateY(0); }
+        50% { transform: translateX(-50%) translateY(-20px); }
+    }
+
+    @keyframes winnerPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    @keyframes sparkleFloat {
+        0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+    }
+
+    @keyframes firework {
+        0% { transform: translateY(0); opacity: 1; }
+        100% { transform: translateY(-100px); opacity: 0; }
+    }
+
+    .winner-stats {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin: 20px 0;
+    }
+
+    .stat-highlight {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 10px 20px;
+        border-radius: 10px;
+        animation: statPop 0.5s ease-out;
+    }
+
+    @keyframes statPop {
+        0% { transform: scale(0); }
+        70% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
   </style>
   <title>Cricket Team Draft</title>
 </head>
@@ -822,7 +925,7 @@
         </button>
         <button class="btn btn-primary" onclick="shareResults()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
-            <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+            <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
           </svg>
           Share Results
         </button>
@@ -830,6 +933,14 @@
     </div>
   </div>
   
+  <div id="winner-celebration" class="celebration-modal">
+    <div class="trophy-container">
+        <div class="trophy-icon">🏆</div>
+    </div>
+    <h2 class="winner-name"></h2>
+    <div class="winner-stats"></div>
+  </div>
+
   <script>
     function setTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
@@ -1381,6 +1492,13 @@
         
         scoreDiff.textContent = message;
 
+        if (player1Total !== player2Total) {
+            const winner = player1Total > player2Total 
+                ? { name: player1Name, score: player1Total, stats: player1Stats }
+                : { name: player2Name, score: player2Total, stats: player2Stats };
+            showWinnerCelebration(winner.name, winner.score, winner.stats);
+        }
+
         saveResultsToLocalStorage(player1Picks, player2Picks, player1Stats, player2Stats);
     }
     
@@ -1654,6 +1772,63 @@
         
         // Scroll to results
         document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function showWinnerCelebration(winnerName, score, stats) {
+        const modal = document.getElementById('winner-celebration');
+        modal.style.display = 'block';
+        modal.querySelector('.winner-name').textContent = `${winnerName} Wins!`;
+        
+        // Add stats
+        const statsContainer = modal.querySelector('.winner-stats');
+        statsContainer.innerHTML = `
+            <div class="stat-highlight">
+                <div>Total Points</div>
+                <div>${score}</div>
+            </div>
+            <div class="stat-highlight">
+                <div>Runs</div>
+                <div>${stats.runs}</div>
+            </div>
+            <div class="stat-highlight">
+                <div>Boundaries</div>
+                <div>${stats.fours}x4s ${stats.sixes}x6s</div>
+            </div>
+        `;
+
+        // Create sparkles
+        for (let i = 0; i < 20; i++) {
+            createSparkle();
+        }
+
+        // Create fireworks
+        for (let i = 0; i < 30; i++) {
+            setTimeout(() => createFirework(), i * 100);
+        }
+
+        // Hide modal after 5 seconds
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 5000);
+    }
+
+    function createSparkle() {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'sparkle';
+        sparkle.style.left = Math.random() * 100 + '%';
+        sparkle.style.animationDelay = Math.random() * 3 + 's';
+        document.getElementById('winner-celebration').appendChild(sparkle);
+        setTimeout(() => sparkle.remove(), 3000);
+    }
+
+    function createFirework() {
+        const firework = document.createElement('div');
+        firework.className = 'firework';
+        firework.style.left = Math.random() * 100 + '%';
+        firework.style.bottom = '0';
+        firework.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        document.getElementById('winner-celebration').appendChild(firework);
+        setTimeout(() => firework.remove(), 1000);
     }
   </script>
 </body>
