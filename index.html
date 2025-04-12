@@ -772,7 +772,7 @@
   <script>
     const cricketTeams = [
     { teams: ["Gujarat Titans", "Lucknow Super Giants"], date: "Apr 12", time: "3:30 PM IST" },
-  { teams: ["Punjab Kings", "Sunrisers Hyderabad"], date: "Apr 12", time: "7:30 PM IST" },
+  { teams: ["Punjab Kings", "Sunrisers Hyderabad"], date: "Apr 12", time: "5:00 PM IST" },
   { teams: ["Royal Challengers Bengaluru", "Rajasthan Royals"], date: "Apr 13", time: "3:30 PM IST" },
   { teams: ["Mumbai Indians", "Delhi Capitals"], date: "Apr 13", time: "7:30 PM IST" },
   { teams: ["Chennai Super Kings", "Lucknow Super Giants"], date: "Apr 14", time: "7:30 PM IST" },
@@ -1522,31 +1522,49 @@
     });
 
     function updateStats() {
-        // Get the current players from the results
-        const player1Picks = Array.from(document.getElementById('player1-picks').children)
-            .filter(el => el.classList.contains('result-item'))
-            .map(li => {
-                const teamId = li.querySelector('.team1-badge, .team2-badge') ? 
-                              (li.querySelector('.team1-badge') ? 1 : 2) : null;
-                const number = li.querySelector('.player-number-result').textContent;
-                const team = li.querySelector('.result-team-badge').textContent;
-                return {team, teamId, number};
-            });
-            
-        const player2Picks = Array.from(document.getElementById('player2-picks').children)
-            .filter(el => el.classList.contains('result-item'))
-            .map(li => {
-                const teamId = li.querySelector('.team1-badge, .team2-badge') ? 
-                              (li.querySelector('.team1-badge') ? 1 : 2) : null;
-                const number = li.querySelector('.player-number-result').textContent;
-                const team = li.querySelector('.result-team-badge').textContent;
-                return {team, teamId, number};
-            });
-
-        if (player1Picks.length > 0 && player2Picks.length > 0) {
-            displayResults(player1Picks, player2Picks);
-            saveStatsToLocalStorage();
+        const team1Name = document.getElementById('team1-name').value;
+        const team2Name = document.getElementById('team2-name').value;
+        
+        if (!team1Name || !team2Name) {
+            alert("Please select teams first!");
+            return;
         }
+
+        // Get all player picks from the team containers
+        const player1Picks = [];
+        const player2Picks = [];
+
+        // Process team 1 and team 2 players
+        [1, 2].forEach(teamId => {
+            document.querySelectorAll(`.team-${teamId} .player-item`).forEach(item => {
+                const playerNumber = item.querySelector('.player-number').textContent;
+                const playerStats = Array.from(item.querySelectorAll('.stat-input')).map(input => input.value || 0);
+                
+                const playerData = {
+                    team: teamId === 1 ? team1Name : team2Name,
+                    teamId: teamId,
+                    number: parseInt(playerNumber)
+                };
+
+                // Alternate between player1Picks and player2Picks
+                if ((teamId === 1 && parseInt(playerNumber) % 2 === 1) || 
+                    (teamId === 2 && parseInt(playerNumber) % 2 === 0)) {
+                    player1Picks.push(playerData);
+                } else {
+                    player2Picks.push(playerData);
+                }
+            });
+        });
+
+        // Display updated results
+        displayResults(player1Picks, player2Picks);
+        document.getElementById('results').style.display = 'block';
+        
+        // Save stats to localStorage
+        saveStatsToLocalStorage();
+        
+        // Scroll to results
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
     }
   </script>
 </body>
