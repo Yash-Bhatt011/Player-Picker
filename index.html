@@ -111,6 +111,17 @@
       border-color: var(--primary-light);
     }
     
+    .team-date {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+    
+    .team-info {
+      display: flex;
+      flex-direction: column;
+    }
+    
     .team-container {
       display: flex;
       flex-wrap: wrap;
@@ -442,12 +453,20 @@
           <h3>Team Names</h3>
           <div class="input-group">
             <label for="team1-name">Team 1</label>
-            <input type="text" id="team1-name" placeholder="Enter name for Team 1">
+            <input type="text" id="team1-name" placeholder="Enter name for Team 1" readonly>
+            <div class="team-date" id="team1-date"></div>
           </div>
           <div class="input-group">
             <label for="team2-name">Team 2</label>
-            <input type="text" id="team2-name" placeholder="Enter name for Team 2">
+            <input type="text" id="team2-name" placeholder="Enter name for Team 2" readonly>
+            <div class="team-date" id="team2-date"></div>
           </div>
+          <button class="btn btn-secondary" onclick="autoFillTeams()" style="width: 100%; margin-top: 10px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
+              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+            </svg>
+            Get Next Match
+          </button>
         </div>
       </div>
       
@@ -560,6 +579,109 @@
   </div>
   
   <script>
+    const cricketTeams = [
+        { teams: ["Gujarat Titans", "Lucknow Super Giants"], date: "Apr 12" },
+        { teams: ["Punjab Kings", "Sunrisers Hyderabad"], date: "Apr 12" },
+        { teams: ["Royal Challengers Bengaluru", "Rajasthan Royals"], date: "Apr 13" },
+        { teams: ["Mumbai Indians", "Delhi Capitals"], date: "Apr 13" },
+        { teams: ["Chennai Super Kings", "Lucknow Super Giants"], date: "Apr 14" },
+        { teams: ["Kolkata Knight Riders", "Punjab Kings"], date: "Apr 15" },
+        { teams: ["Rajasthan Royals", "Delhi Capitals"], date: "Apr 16" },
+        { teams: ["Sunrisers Hyderabad", "Mumbai Indians"], date: "Apr 17" },
+        { teams: ["Punjab Kings", "Royal Challengers Bengaluru"], date: "Apr 18" },
+        { teams: ["Delhi Capitals", "Gujarat Titans"], date: "Apr 19" },
+        { teams: ["Lucknow Super Giants", "Rajasthan Royals"], date: "Apr 19" },
+        { teams: ["Royal Challengers Bengaluru", "Punjab Kings"], date: "Apr 20" },
+        { teams: ["Chennai Super Kings", "Mumbai Indians"], date: "Apr 20" },
+        { teams: ["Gujarat Titans", "Kolkata Knight Riders"], date: "Apr 21" },
+        { teams: ["Delhi Capitals", "Lucknow Super Giants"], date: "Apr 22" },
+        { teams: ["Mumbai Indians", "Sunrisers Hyderabad"], date: "Apr 23" },
+        { teams: ["Rajasthan Royals", "Royal Challengers Bengaluru"], date: "Apr 24" },
+        { teams: ["Sunrisers Hyderabad", "Chennai Super Kings"], date: "Apr 25" },
+        { teams: ["Punjab Kings", "Kolkata Knight Riders"], date: "Apr 26" },
+        { teams: ["Lucknow Super Giants", "Mumbai Indians"], date: "Apr 27" },
+        { teams: ["Gujarat Titans", "Rajasthan Royals"], date: "Apr 28" },
+        { teams: ["Kolkata Knight Riders", "Delhi Capitals"], date: "Apr 29" },
+        { teams: ["Punjab Kings", "Chennai Super Kings"], date: "Apr 30" },
+        { teams: ["Mumbai Indians", "Rajasthan Royals"], date: "May 1" },
+        { teams: ["Sunrisers Hyderabad", "Gujarat Titans"], date: "May 2" },
+        { teams: ["Chennai Super Kings", "Royal Challengers Bengaluru"], date: "May 3" },
+        { teams: ["Rajasthan Royals", "Kolkata Knight Riders"], date: "May 4" },
+        { teams: ["Lucknow Super Giants", "Punjab Kings"], date: "May 4" },
+        { teams: ["Delhi Capitals", "Sunrisers Hyderabad"], date: "May 5" },
+        { teams: ["Gujarat Titans", "Mumbai Indians"], date: "May 6" },
+        { teams: ["Chennai Super Kings", "Kolkata Knight Riders"], date: "May 7" },
+        { teams: ["Delhi Capitals", "Punjab Kings"], date: "May 8" },
+        { teams: ["Royal Challengers Bengaluru", "Lucknow Super Giants"], date: "May 9" },
+        { teams: ["Kolkata Knight Riders", "Sunrisers Hyderabad"], date: "May 10" },
+        { teams: ["Mumbai Indians", "Punjab Kings"], date: "May 11" },
+        { teams: ["Gujarat Titans", "Delhi Capitals"], date: "May 11" },
+        { teams: ["Rajasthan Royals", "Chennai Super Kings"], date: "May 12" },
+        { teams: ["Sunrisers Hyderabad", "Royal Challengers Bengaluru"], date: "May 13" },
+        { teams: ["Lucknow Super Giants", "Gujarat Titans"], date: "May 14" },
+        { teams: ["Delhi Capitals", "Mumbai Indians"], date: "May 15" },
+        { teams: ["Punjab Kings", "Rajasthan Royals"], date: "May 16" },
+        { teams: ["Kolkata Knight Riders", "Royal Challengers Bengaluru"], date: "May 17" },
+        { teams: ["Chennai Super Kings", "Gujarat Titans"], date: "May 18" },
+        { teams: ["Sunrisers Hyderabad", "Lucknow Super Giants"], date: "May 18" },
+        { teams: ["2nd Place", "1st Place"], date: "May 20 - Qualifier 1" },
+        { teams: ["4th Place", "3rd Place"], date: "May 21 - Eliminator" },
+        { teams: ["Winner of Eliminator", "Loser of Qualifier 1"], date: "May 23 - Qualifier 2" },
+        { teams: ["Winner of Qualifier 2", "Winner of Qualifier 1"], date: "May 25 - Final" }
+    ];
+
+    let currentTeamIndex = 0;
+
+    function autoFillTeams() {
+        if (currentTeamIndex >= cricketTeams.length) {
+            currentTeamIndex = 0;
+        }
+
+        const match = cricketTeams[currentTeamIndex];
+        const team1Input = document.getElementById('team1-name');
+        const team2Input = document.getElementById('team2-name');
+        const team1Date = document.getElementById('team1-date');
+        const team2Date = document.getElementById('team2-date');
+
+        // Animate the text change
+        team1Input.style.transition = 'opacity 0.3s';
+        team2Input.style.transition = 'opacity 0.3s';
+        team1Input.style.opacity = '0';
+        team2Input.style.opacity = '0';
+
+        setTimeout(() => {
+            team1Input.value = match.teams[0];
+            team2Input.value = match.teams[1];
+            team1Date.textContent = `Match Date: ${match.date}`;
+            team2Date.textContent = `Match Date: ${match.date}`;
+            team1Input.style.opacity = '1';
+            team2Input.style.opacity = '1';
+            
+            // Update team displays
+            document.getElementById('team1-display').textContent = match.teams[0];
+            document.getElementById('team2-display').textContent = match.teams[1];
+        }, 300);
+
+        currentTeamIndex++;
+        createMiniConfetti();
+    }
+
+    function createMiniConfetti() {
+        const colors = ['#1e40af', '#059669', '#f59e0b'];
+        for (let i = 0; i < 30; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = '50%';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.width = Math.random() * 8 + 3 + 'px';
+            confetti.style.height = Math.random() * 8 + 3 + 'px';
+            confetti.style.opacity = Math.random() + 0.5;
+            confetti.style.animationDuration = Math.random() * 2 + 1 + 's';
+            document.body.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 3000);
+        }
+    }
+
     // Update team name displays when input changes
     document.getElementById('team1-name').addEventListener('input', function() {
       document.getElementById('team1-display').textContent = this.value || 'Team 1';
@@ -575,7 +697,7 @@
     function startCooldown() {
         const button = document.getElementById('randomize-btn');
         let timeLeft = 60; // 60 seconds cooldown
-        
+         
         button.disabled = true;
         isButtonEnabled = false;
         
@@ -597,7 +719,7 @@
                 button.innerHTML = `
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shuffle" viewBox="0 0 16 16" style="margin-right: 8px;">
                         <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.624 9.624 0 0 0 7.556 8a9.624 9.624 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
-                        <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192zm0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"/>
+                        <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"/>
                     </svg>
                     Randomize Draft`;
             }
@@ -710,7 +832,7 @@
         isButtonEnabled = true;
         button.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shuffle" viewBox="0 0 16 16" style="margin-right: 8px;">
-                <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.624 9.624 0 0 0 7.556 8a9.624 9.624 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
+                <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.624 9.624 0 0 1 7.556 8a9.624 9.624 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
                 <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192zm0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"/>
             </svg>
             Randomize Draft`;
