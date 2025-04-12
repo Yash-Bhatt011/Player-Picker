@@ -569,147 +569,183 @@
       document.getElementById('team2-display').textContent = this.value || 'Team 2';
     });
     
+    let isButtonEnabled = true;
+    let cooldownTimer;
+
+    function startCooldown() {
+        const button = document.getElementById('randomize-btn');
+        let timeLeft = 60; // 60 seconds cooldown
+        
+        button.disabled = true;
+        isButtonEnabled = false;
+        
+        // Update button text to show countdown
+        cooldownTimer = setInterval(() => {
+            button.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shuffle" viewBox="0 0 16 16" style="margin-right: 8px;">
+                    <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.624 9.624 0 0 0 7.556 8a9.624 9.624 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
+                    <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192zm0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"/>
+                </svg>
+                Wait ${timeLeft}s`;
+            
+            timeLeft--;
+            
+            if (timeLeft < 0) {
+                clearInterval(cooldownTimer);
+                button.disabled = false;
+                isButtonEnabled = true;
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shuffle" viewBox="0 0 16 16" style="margin-right: 8px;">
+                        <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.624 9.624 0 0 0 7.556 8a9.624 9.624 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
+                        <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192zm0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"/>
+                    </svg>
+                    Randomize Draft`;
+            }
+        }, 1000);
+    }
+
     function randomizeDraft() {
-      // Get team names (or use defaults)
-      const team1Name = document.getElementById('team1-name').value || 'Team 1';
-      const team2Name = document.getElementById('team2-name').value || 'Team 2';
-      
-      // Get player names (or use defaults)
-      const player1Name = document.getElementById('player1-name').value || '';
-      const player2Name = document.getElementById('player2-name').value || 'Player 2';
-      
-      // Update result headers
-      document.getElementById('player1-result-header').textContent = player1Name + "'s Team";
-      document.getElementById('player2-result-header').textContent = player2Name + "'s Team";
-      
-      // Create array of all players from both teams
-      const allPlayers = [
-        {team: team1Name, teamId: 1, number: 1},
-        {team: team1Name, teamId: 1, number: 2},
-        {team: team1Name, teamId: 1, number: 3},
-        {team: team1Name, teamId: 1, number: 4},
-        {team: team2Name, teamId: 2, number: 1},
-        {team: team2Name, teamId: 2, number: 2},
-        {team: team2Name, teamId: 2, number: 3},
-        {team: team2Name, teamId: 2, number: 4}
-      ];
-      
-      // Shuffle array randomly
-      for (let i = allPlayers.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [allPlayers[i], allPlayers[j]] = [allPlayers[j], allPlayers[i]];
-      }
-      
-      // Split into two teams
-      const player1Picks = allPlayers.slice(0, 4);
-      const player2Picks = allPlayers.slice(4, 8);
-      
-      // Display results
-      displayResults(player1Picks, player2Picks);
-      
-      // Show results section
-      document.getElementById('results').style.display = 'block';
-      
-      // Create confetti effect
-      createConfetti();
-      
-      // Scroll to results
-      document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        if (!isButtonEnabled) return;
+        
+        // Start the cooldown
+        startCooldown();
+        
+        // Rest of your existing randomizeDraft code
+        const team1Name = document.getElementById('team1-name').value || 'Team 1';
+        const team2Name = document.getElementById('team2-name').value || 'Team 2';
+        
+        const player1Name = document.getElementById('player1-name').value || '';
+        const player2Name = document.getElementById('player2-name').value || 'Player 2';
+        
+        document.getElementById('player1-result-header').textContent = player1Name + "'s Team";
+        document.getElementById('player2-result-header').textContent = player2Name + "'s Team";
+        
+        const allPlayers = [
+            {team: team1Name, teamId: 1, number: 1},
+            {team: team1Name, teamId: 1, number: 2},
+            {team: team1Name, teamId: 1, number: 3},
+            {team: team1Name, teamId: 1, number: 4},
+            {team: team2Name, teamId: 2, number: 1},
+            {team: team2Name, teamId: 2, number: 2},
+            {team: team2Name, teamId: 2, number: 3},
+            {team: team2Name, teamId: 2, number: 4}
+        ];
+        
+        for (let i = allPlayers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [allPlayers[i], allPlayers[j]] = [allPlayers[j], allPlayers[i]];
+        }
+        
+        const player1Picks = allPlayers.slice(0, 4);
+        const player2Picks = allPlayers.slice(4, 8);
+        
+        displayResults(player1Picks, player2Picks);
+        
+        document.getElementById('results').style.display = 'block';
+        
+        createConfetti();
+        
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
     }
     
     function displayResults(player1Picks, player2Picks) {
-      const player1Div = document.getElementById('player1-picks');
-      const player2Div = document.getElementById('player2-picks');
-      
-      player1Div.innerHTML = '';
-      player2Div.innerHTML = '';
-      
-      player1Picks.forEach(pick => {
-        const li = document.createElement('li');
-        li.className = 'result-item';
+        const player1Div = document.getElementById('player1-picks');
+        const player2Div = document.getElementById('player2-picks');
         
-        const teamBadge = document.createElement('span');
-        teamBadge.className = `result-team-badge team${pick.teamId}-badge`;
-        teamBadge.textContent = pick.team;
+        player1Div.innerHTML = '';
+        player2Div.innerHTML = '';
         
-        const playerNumber = document.createElement('span');
-        playerNumber.className = `player-number-result team${pick.teamId}-number`;
-        playerNumber.textContent = pick.number;
+        player1Picks.forEach(pick => {
+            const li = document.createElement('li');
+            li.className = 'result-item';
+            
+            const teamBadge = document.createElement('span');
+            teamBadge.className = `result-team-badge team${pick.teamId}-badge`;
+            teamBadge.textContent = pick.team;
+            
+            const playerNumber = document.createElement('span');
+            playerNumber.className = `player-number-result team${pick.teamId}-number`;
+            playerNumber.textContent = pick.number;
+            
+            const playerText = document.createElement('span');
+            playerText.textContent = `Player ${pick.number}`;
+            
+            li.appendChild(teamBadge);
+            li.appendChild(playerNumber);
+            li.appendChild(playerText);
+            
+            player1Div.appendChild(li);
+        });
         
-        const playerText = document.createElement('span');
-        playerText.textContent = `Player ${pick.number}`;
-        
-        li.appendChild(teamBadge);
-        li.appendChild(playerNumber);
-        li.appendChild(playerText);
-        
-        player1Div.appendChild(li);
-      });
-      
-      player2Picks.forEach(pick => {
-        const li = document.createElement('li');
-        li.className = 'result-item';
-        
-        const teamBadge = document.createElement('span');
-        teamBadge.className = `result-team-badge team${pick.teamId}-badge`;
-        teamBadge.textContent = pick.team;
-        
-        const playerNumber = document.createElement('span');
-        playerNumber.className = `player-number-result team${pick.teamId}-number`;
-        playerNumber.textContent = pick.number;
-        
-        const playerText = document.createElement('span');
-        playerText.textContent = `Player ${pick.number}`;
-        
-        li.appendChild(teamBadge);
-        li.appendChild(playerNumber);
-        li.appendChild(playerText);
-        
-        player2Div.appendChild(li);
-      });
+        player2Picks.forEach(pick => {
+            const li = document.createElement('li');
+            li.className = 'result-item';
+            
+            const teamBadge = document.createElement('span');
+            teamBadge.className = `result-team-badge team${pick.teamId}-badge`;
+            teamBadge.textContent = pick.team;
+            
+            const playerNumber = document.createElement('span');
+            playerNumber.className = `player-number-result team${pick.teamId}-number`;
+            playerNumber.textContent = pick.number;
+            
+            const playerText = document.createElement('span');
+            playerText.textContent = `Player ${pick.number}`;
+            
+            li.appendChild(teamBadge);
+            li.appendChild(playerNumber);
+            li.appendChild(playerText);
+            
+            player2Div.appendChild(li);
+        });
     }
     
     function resetDraft() {
-      // Hide results
-      document.getElementById('results').style.display = 'none';
-      
-      // Clear player picks
-      document.getElementById('player1-picks').innerHTML = '';
-      document.getElementById('player2-picks').innerHTML = '';
-      
-      // Remove all confetti
-      const confetti = document.querySelectorAll('.confetti');
-      confetti.forEach(c => c.remove());
+        if (cooldownTimer) {
+            clearInterval(cooldownTimer);
+        }
+        
+        const button = document.getElementById('randomize-btn');
+        button.disabled = false;
+        isButtonEnabled = true;
+        button.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shuffle" viewBox="0 0 16 16" style="margin-right: 8px;">
+                <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.624 9.624 0 0 0 7.556 8a9.624 9.624 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
+                <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192zm0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"/>
+            </svg>
+            Randomize Draft`;
+        
+        document.getElementById('results').style.display = 'none';
+        document.getElementById('player1-picks').innerHTML = '';
+        document.getElementById('player2-picks').innerHTML = '';
+        const confetti = document.querySelectorAll('.confetti');
+        confetti.forEach(c => c.remove());
     }
     
     function createConfetti() {
-      // Remove any existing confetti
-      const existingConfetti = document.querySelectorAll('.confetti');
-      existingConfetti.forEach(c => c.remove());
-      
-      // Create new confetti
-      const colors = ['#FD0', '#FC0', '#F90', '#FF0', '#0CF', '#0FC', '#CF0'];
-      
-      for (let i = 0; i < 100; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.left = Math.random() * 100 + 'vw';
-        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        confetti.style.width = Math.random() * 10 + 5 + 'px';
-        confetti.style.height = Math.random() * 10 + 5 + 'px';
-        confetti.style.opacity = Math.random() + 0.5;
-        confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
-        confetti.style.animationDelay = Math.random() * 5 + 's';
+        const existingConfetti = document.querySelectorAll('.confetti');
+        existingConfetti.forEach(c => c.remove());
         
-        document.body.appendChild(confetti);
+        const colors = ['#FD0', '#FC0', '#F90', '#FF0', '#0CF', '#0FC', '#CF0'];
         
-        // Remove confetti after animation completes
-        setTimeout(() => {
-          confetti.remove();
-        }, 8000);
-      }
+        for (let i = 0; i < 100; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.width = Math.random() * 10 + 5 + 'px';
+            confetti.style.height = Math.random() * 10 + 5 + 'px';
+            confetti.style.opacity = Math.random() + 0.5;
+            confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+            confetti.style.animationDelay = Math.random() * 5 + 's';
+            
+            document.body.appendChild(confetti);
+            
+            setTimeout(() => {
+                confetti.remove();
+            }, 8000);
+        }
     }
   </script>
 </body>
 </html>
-``` 
