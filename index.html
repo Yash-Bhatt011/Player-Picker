@@ -16,6 +16,62 @@
       --border: #e5e7eb;
       --success: #10b981;
     }
+
+    /* Dark mode variables */
+    [data-theme="dark"] {
+      --primary: #60a5fa;
+      --primary-light: #3b82f6;
+      --secondary: #34d399;
+      --accent: #fbbf24;
+      --background: #1f2937;
+      --card-bg: #111827;
+      --text: #f3f4f6;
+      --text-light: #9ca3af;
+      --border: #374151;
+      --success: #10b981;
+    }
+
+    /* Dark mode specific overrides */
+    [data-theme="dark"] .stat-input {
+      background-color: #374151;
+      color: var(--text);
+    }
+
+    [data-theme="dark"] .result-item {
+      background-color: #374151;
+    }
+
+    [data-theme="dark"] .total-stat-box {
+      background-color: #1f2937;
+    }
+
+    /* Theme toggle button */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    .theme-toggle svg {
+      width: 20px;
+      height: 20px;
+      color: var(--text);
+    }
     
     * {
       box-sizing: border-box;
@@ -563,6 +619,11 @@
   <title>Cricket Team Draft</title>
 </head>
 <body>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+    </svg>
+  </button>
   <div class="container">
     <div class="header">
       <h1>Cricket Team Draft</h1>
@@ -770,6 +831,34 @@
   </div>
   
   <script>
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      updateThemeIcon(theme);
+    }
+
+    function toggleTheme() {
+      const currentTheme = localStorage.getItem('theme') || 'light';
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      setTheme(newTheme);
+    }
+
+    function updateThemeIcon(theme) {
+      const icon = document.querySelector('.theme-toggle svg');
+      if (theme === 'dark') {
+        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />`;
+      } else {
+        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      setTheme(savedTheme);
+      
+      // ...existing code...
+    });
+
     const cricketTeams = [
     { teams: ["Gujarat Titans", "Lucknow Super Giants"], date: "Apr 12", time: "3:30 PM IST" },
   { teams: ["Punjab Kings", "Sunrisers Hyderabad"], date: "Apr 12", time: "5:00 PM IST" },
