@@ -724,7 +724,7 @@
 <body>
   <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 9.003 0 008.354-5.646z" />
     </svg>
   </button>
   <div class="container">
@@ -766,6 +766,26 @@
               <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
             </svg>
             Get Next Match
+          </button>
+          <button class="btn btn-secondary" onclick="showPreviousMatches()" style="width: 100%; margin-top: 10px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+            </svg>
+            Previous Matches
+          </button>
+        </div>
+      </div>
+
+      <!-- Add this modal for previous matches -->
+      <div id="previous-matches-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: relative; max-width: 600px; margin: 50px auto; background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+          <h3 style="margin-bottom: 20px; color: var(--primary);">Previous Matches</h3>
+          <div id="previous-matches-list" style="max-height: 400px; overflow-y: auto;">
+            <!-- Matches will be inserted here -->
+          </div>
+          <button onclick="document.getElementById('previous-matches-modal').style.display='none'" 
+                  style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--text); cursor: pointer;">
+            ✕
           </button>
         </div>
       </div>
@@ -959,7 +979,7 @@
       if (theme === 'dark') {
         icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />`;
       } else {
-        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />`;
+        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 9.003 0 008.354-5.646z" />`
       }
     }
 
@@ -971,6 +991,8 @@
     });
 
     const cricketTeams = [
+    { teams: ["Royal Challengers Bengaluru", "Delhi Capitals"], date: "Apr 10", time: "7:30 PM IST" },
+  { teams: ["Chennai Super Kings", "Kolkata Knight Riders"], date: "Apr 11", time: "7:30 PM IST" },
     { teams: ["Gujarat Titans", "Lucknow Super Giants"], date: "Apr 12", time: "3:30 PM IST" },
   { teams: ["Punjab Kings", "Sunrisers Hyderabad"], date: "Apr 12", time: "7:30 PM IST" },
   { teams: ["Royal Challengers Bengaluru", "Rajasthan Royals"], date: "Apr 13", time: "3:30 PM IST" },
@@ -1205,6 +1227,37 @@
                 localStorage.removeItem('nextMatch');
             }
         }
+    }
+
+    function showPreviousMatches() {
+        const modal = document.getElementById('previous-matches-modal');
+        const list = document.getElementById('previous-matches-list');
+        list.innerHTML = '';
+
+        cricketTeams.forEach(match => {
+            const dateTime = parseMatchDateTime(match.date, match.time);
+            const now = new Date();
+            if (dateTime < now) {
+                const item = document.createElement('div');
+                item.style.padding = '10px';
+                item.style.borderBottom = '1px solid var(--border)';
+                item.style.cursor = 'pointer';
+                item.textContent = `${match.teams[0]} vs ${match.teams[1]} - ${match.date} | ${match.time}`;
+                item.onclick = () => {
+                    updateTeamDisplay({
+                        teams: match.teams,
+                        date: match.date,
+                        time: match.time,
+                        matchTime: dateTime,
+                        timeDiff: now - dateTime
+                    });
+                    modal.style.display = 'none';
+                };
+                list.appendChild(item);
+            }
+        });
+
+        modal.style.display = 'block';
     }
 
     // Update team name displays when input changes
