@@ -862,6 +862,10 @@
           </div>
         </div>
         
+        <button class="btn btn-secondary" onclick="resetPlayerNames()" style="width: 100%; margin-top: 10px;">
+            Reset Player Names
+        </button>
+        
         <div class="team-setup">
           <h3>Team Names</h3>
           <div class="input-group">
@@ -887,6 +891,9 @@
             Previous Matches
           </button>
         </div>
+        <button class="btn btn-secondary" onclick="resetTeamNames()" style="width: 100%; margin-top: 10px;">
+            Reset Team Names
+        </button>
       </div>
 
       <!-- Add this modal for previous matches -->
@@ -1009,6 +1016,13 @@
           <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
         </svg>
         Update Stats
+      </button>
+      <button class="btn btn-secondary" onclick="clearStats()" style="margin-left: 10px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16" style="margin-right: 8px;">
+          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+          <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+        </svg>
+        Clear Stats
       </button>
     </div>
     
@@ -1437,7 +1451,7 @@
                 isButtonEnabled = true;
                 button.innerHTML = `
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shuffle" viewBox="0 0 16 16" style="margin-right: 8px;">
-                        <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827-1.24 4.874-2.418.49.552.865 1.102 1.126 1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
+                        <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827-1.24 4.874-2.418.49.552.865 1.102 1.126 1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173-1.01-4.126 2.082A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
                         <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"/>
                     </svg>
                     Randomize Draft`;
@@ -1910,45 +1924,66 @@
     function updateStats() {
         const team1Name = document.getElementById('team1-name').value;
         const team2Name = document.getElementById('team2-name').value;
-        
+
         if (!team1Name || !team2Name) {
             showPopup("Team Selection Required", "Please select teams first!", "warning");
             return;
         }
 
-        // Get all player picks from the team containers
+        // Get existing player assignments
         const player1Picks = [];
         const player2Picks = [];
+
+        // Determine player assignments based on existing results
+        const player1ResultHeader = document.getElementById('player1-result-header').textContent;
+        const player2ResultHeader = document.getElementById('player2-result-header').textContent;
+
+        // Get all player picks from the team containers
+        const allPlayers = [];
 
         // Process team 1 and team 2 players
         [1, 2].forEach(teamId => {
             document.querySelectorAll(`.team-${teamId} .player-item`).forEach(item => {
                 const playerNumber = item.querySelector('.player-number').textContent;
-                const playerStats = Array.from(item.querySelectorAll('.stat-input')).map(input => input.value || 0);
-                
+
                 const playerData = {
                     team: teamId === 1 ? team1Name : team2Name,
                     teamId: teamId,
                     number: parseInt(playerNumber)
                 };
 
-                // Alternate between player1Picks and player2Picks
-                if ((teamId === 1 && parseInt(playerNumber) % 2 === 1) || 
-                    (teamId === 2 && parseInt(playerNumber) % 2 === 0)) {
-                    player1Picks.push(playerData);
-                } else {
-                    player2Picks.push(playerData);
-                }
+                allPlayers.push(playerData);
             });
+        });
+
+        // Assign players to player1Picks and player2Picks based on existing results
+        allPlayers.forEach(player => {
+            if (player1ResultHeader.includes(document.getElementById('player1-name').value)) {
+                // Assign players to player1Picks and player2Picks based on existing results
+                if ((player.teamId === 1 && parseInt(player.number) % 2 === 1) ||
+                    (player.teamId === 2 && parseInt(player.number) % 2 === 0)) {
+                    player1Picks.push(player);
+                } else {
+                    player2Picks.push(player);
+                }
+            } else {
+                // Assign players to player1Picks and player2Picks based on existing results
+                if ((player.teamId === 1 && parseInt(player.number) % 2 === 0) ||
+                    (player.teamId === 2 && parseInt(player.number) % 2 === 1)) {
+                    player1Picks.push(player);
+                } else {
+                    player2Picks.push(player);
+                }
+            }
         });
 
         // Display updated results
         displayResults(player1Picks, player2Picks);
         document.getElementById('results').style.display = 'block';
-        
+
         // Save stats to localStorage
         saveStatsToLocalStorage();
-        
+
         // Scroll to results
         document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
     }
@@ -2042,6 +2077,22 @@
       overlay.onclick = (e) => {
         if (e.target === overlay) closePopup();
       };
+    }
+
+    function resetPlayerNames() {
+        document.getElementById('player1-name').value = '';
+        document.getElementById('player2-name').value = '';
+    }
+
+    function resetTeamNames() {
+        document.getElementById('team1-name').value = '';
+        document.getElementById('team2-name').value = '';
+        document.getElementById('team1-date').textContent = '';
+        document.getElementById('team2-date').textContent = '';
+
+        // Re-enable the "Get Next Match" button
+        const autoFillButton = document.querySelector('.btn.btn-secondary[onclick="autoFillTeams()"]');
+        autoFillButton.disabled = false;
     }
   </script>
 </body>
