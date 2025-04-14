@@ -1437,7 +1437,7 @@
                 isButtonEnabled = true;
                 button.innerHTML = `
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shuffle" viewBox="0 0 16 16" style="margin-right: 8px;">
-                        <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827-1.24 4.874-2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
+                        <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827-1.24 4.874-2.418.49.552.865 1.102 1.126 1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
                         <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"/>
                     </svg>
                     Randomize Draft`;
@@ -1461,11 +1461,11 @@
         const team2Input = document.getElementById('team2-name');
         
         if (!team1Input.value || !team2Input.value) {
-            showPopup("Team Selection Required", "Please select teams using 'Get Next Match' first!", "warning");
+            showPopup("Team Selection Required", "Please select teams using 'Get Next Match' or 'Previous Matches' first!", "warning");
             return;
         }
 
-        // Check if within 30 minutes of match time
+        // Get match date and check if it's a past match
         const matchDateStr = document.getElementById('team1-date').textContent.replace('Match Date: ', '');
         if (!matchDateStr) {
             showPopup("Match Date Missing", "Match date not found. Please select teams first!", "error");
@@ -1477,8 +1477,12 @@
         const now = new Date();
         const timeDiff = matchDateTime - now;
 
-        // If not within 30 minutes before match
-        if (timeDiff > 30 * 60 * 1000) {
+        // Skip time restrictions for past matches
+        if (timeDiff < 0) {
+            // Continue with team generation for past matches
+        }
+        // Keep time restrictions for upcoming matches
+        else if (timeDiff > 30 * 60 * 1000) {
             const hours = Math.floor(timeDiff / (60 * 60 * 1000));
             const minutes = Math.floor((timeDiff % (60 * 60 * 1000)) / (60 * 1000));
             const days = Math.floor(hours / 24);
@@ -1490,12 +1494,6 @@
                 message = `Match starts in ${hours}h ${minutes}m`;
             }
             showPopup("Match Not Ready", `${message}\nCome back 30 minutes before match time to randomize teams.`, "info");
-            return;
-        }
-
-        // If match has already started (more than 30 minutes past start time)
-        if (timeDiff < -(30 * 60 * 1000)) {
-            showPopup("Match Started", "This match has already started. Please select a new match.", "error");
             return;
         }
 
